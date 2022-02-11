@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.icia.mapper.GoodsMapper">
+
+	<sql id="criteria">
+		<trim prefix="(" suffix=") AND " prefixOverrides="OR">
+			<foreach item="type" collection="typeArr">
+				<trim prefix="OR">
+					<choose>
+						<when test="type=='T'.toString()">
+							gdsName like '%'||#{keyword}||'%'
+						</when>
+						<when test="type=='C'.toString()">
+							gdsDes like '%'||#{keyword}||'%'
+						</when>					
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+
+	<insert id="register">
+		insert into tbl_goods (gdsNum, gdsName,
+		cateCode,cateCode1,cateCode2,
+		gdsPrice, gdsStock, gdsDes,pdId ,userId)
+		values
+		(seq.nextval, #{gdsName}, #{cateCode},#{cateCode1},
+		#{cateCode2},#{gdsPrice},#{gdsStock},#{gdsDes},#{pdId},#{userId})
+	</insert>
+
+	<insert id="bue">
+		insert into tbl_bue(gdsNum, gdsName,
+		cateCode,cateCode1,cateCode2,
+		gdsPrice, gdsStock, pdId )
+	values(#{gdsNum},#{gdsName}, #{cateCode},#{cateCode1},
+		#{cateCode2},#{gdsPrice},#{gdsStock},#{pdId})
+	</insert>
+
+	<resultMap type="kr.icia.domain.GoodsVO" id="goodsMap">
+		<id property="gdsNum" column="gdsNum" />
+		<result property="gdsNum" column="gdsNum" />
+		<result property="cateCode" column="cateCode" />
+		<result property="cateCode1" column="cateCode1" />
+		<result property="cateCode2" column="cateCode2" />
+		<result property="gdsName" column="gdsName" />
+		<result property="gdsStock" column="gdsStock" />
+		<result property="gdsDate" column="gdsDate" />
+		<result property="gdsPrice" column="gdsPrice" />
+		<result property="pdId" column="pdId" />
+		<result property="userId" column="userId" />
+	</resultMap>
+
+
+	<select id="goodslist" resultType="kr.icia.domain.GoodsVO">
+		<![CDATA[
+ 		select
+  		gdsNum, gdsName, cateCode, cateCode1,cateCode2,gdsPrice, gdsStock, gdsDes, gdsImg, gdsDate, pdId, replycnt
+  		 from
+   		(select /*+INDEX_DESC(tbl_goods pk_goods) */ 
+  		 rownum rn,  gdsNum, gdsName, cateCode, cateCode1,cateCode2,gdsPrice, gdsStock, gdsDes, gdsImg, gdsDate, pdId, replycnt
+   		 from tbl_goods
+    		where 
+         ]]>
+		<include refid="criteria" />
+         	
+         <![CDATA[
+    rownum <=#{pageNum}*#{amount})
+    where rn>(#{pageNum}-1)*#{amount}
+   ]]>
+	</select>
+	
+	<select id="mandresslist" resultType="kr.icia.domain.GoodsVO">	
+ 		select
+  		gdsNum, gdsName, cateCode, cateCode1,cateCode2,gdsPrice, gdsStock, gdsDes, gdsImg, gdsDate, pdId, replycnt
+   		 from tbl_goods
+    		where   
+    		cateCode=#{cateCode}
+    		
+	</select>
+		<select id="cartlist" resultType="kr.icia.domain.GoodsVO">	
+ 		select
+  		gdsNum, gdsName, cateCode, cateCode1,cateCode2,gdsPrice, gdsStock, gdsDes, gdsImg, gdsDate, pdId, replycnt
+   		 from tbl_goods
+    		where   
+    		gdsNum=#{gdsNum}
+    		
+	</select>
+	<select id="seasonlist" resultType="kr.icia.domain.GoodsVO">	
+ 		select
+  		gdsNum, gdsName, cateCode, cateCode1,cateCode2,gdsPrice, gdsStock, gdsDes, gdsImg, gdsDate, pdId, replycnt
+   		 from tbl_goods
+    		where   
+    		cateCode2=#{cateCode2}
+    		
+	</select>
+	
+	<select id="garmentslist" resultType="kr.icia.domain.GoodsVO">	
+ 		select
+  		gdsNum, gdsName, cateCode, cateCode1,cateCode2,gdsPrice, gdsStock, gdsDes, gdsImg, gdsDate, pdId, replycnt
+   		 from tbl_goods
+    		where   
+    		cateCode1=#{cateCode1}
+    		
+	</select>
+	
+	<update id="updateReplyCnt">
+		update tbl_goods set replycnt =replycnt + #{amount}
+		where gdsNum=#{gdsNum}
+	</update>
+
+	<select id="goodsView" resultMap="goodsMap">
+		select gdsNum, gdsName,
+		cateCode, cateCode1, cateCode2,
+		gdsPrice, gdsStock, gdsDes,gdsImg,
+		gdsDate, pdId ,userId
+		from tbl_goods
+		where gdsNum = #{gdsNum}
+	</select>
+	
+	
+		<select id="goodsbue" resultMap="goodsMap">
+		select gdsNum, gdsName,
+		cateCode, cateCode1, cateCode2,
+		gdsPrice, gdsStock, gdsDes,gdsImg,
+		gdsDate, pdId,userId
+		from tbl_goods
+		where gdsNum = #{gdsNum}
+	</select>
+	
+	<update id="goodsModify">
+		update tbl_goods
+		set
+		gdsName = #{gdsName},
+		cateCode =
+		#{cateCode},
+		cateCode1 = #{cateCode1},
+		cateCode2 = #{cateCode2},
+		gdsPrice = #{gdsPrice},
+		gdsStock = #{gdsStock},
+		gdsDes = #{gdsDes}
+		where
+		gdsNum = ${gdsNum}
+	</update>
+
+	<delete id="goodsDelete">
+		delete tbl_goods where gdsNum=#{gdsNum}
+	</delete>
+
+	<select id="getTotalCount" resultType="int">
+	<![CDATA[
+	select count(gdsNum) from tbl_goods where
+	]]>
+
+		<include refid="criteria" />
+
+	<![CDATA[
+	gdsNum > 0
+	]]>
+	</select>
+	<select id="read" resultType="kr.icia.domain.GoodsVO">
+		select * from tbl_goods where
+		gdsNum=#{gdsNum}
+	</select>
+</mapper>

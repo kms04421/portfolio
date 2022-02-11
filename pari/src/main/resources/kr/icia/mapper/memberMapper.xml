@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.icia.mapper.memberMapper">
+
+
+	<!-- resultType : 자동으로 설정된 리턴 타입. resultMap : 수동으로 설정된 리턴 타입. -->
+	<resultMap type="kr.icia.domain.AuthVO" id="authMap">
+		<result property="userId" column="userId" />
+		<result property="auth" column="auth" />
+	</resultMap>
+
+	<resultMap type="kr.icia.domain.MemberVO" id="memberMap">
+		<id property="userId" column="userId" />
+		<result property="userId" column="userId" />
+		<result property="userPass" column="userPass" />
+		<result property="userName" column="userName" />
+		<result property="regDate" column="regDate" />
+		<result property="userMail" column="userMail" />
+		<result property="userPhon" column="userPhon" />
+		<result property="updateDate" column="updateDate" />
+		<result property="auth" column="auth" />
+		<result property="admin" column="admin" />
+		<collection property="authList" resultMap="authMap" />
+	</resultMap>
+
+	<select id="read" resultMap="memberMap">
+		select
+		mem.userId, mem.userPass, 
+		mem.userName,mem.userMail,
+		mem.enabled, mem.regDate, mem.userPhon, mem.updateDate, auth.auth ,auth.admin
+		from
+		tbl_member mem
+		left outer join
+		tbl_member_auth auth on mem.userId=auth.userId
+		where
+		mem.userId= #{userId}
+
+	</select>
+
+
+		<select id="readall" resultType="kr.icia.domain.MemberVO">
+		select
+		userId, userPass, 
+		userName,userMail,
+		enabled,regDate, userPhon, updateDate
+		from
+		tbl_member
+		
+
+	</select>
+	
+	<delete id="mbrDelete">
+		delete tbl_member where userId=#{userId}
+	</delete>
+	
+	<select id="findPw" parameterType="map" resultType="int">
+		select
+		count(userPass) from tbl_member
+		where userid=#{userid} and
+		userMail=#{userMail}
+	</select>
+
+	<update id="pwMailSend">
+		update tbl_member set userPass=#{userPass}
+		where
+		userid=#{userId} and userMail=#{userMail}
+	</update>
+
+	<!-- 회원가입 -->
+	<insert id="signup">
+		insert into tbl_member(userId, userPass, userName,
+		userPhon,userMail)
+		values(#{userId}, #{userPass}, #{userName},
+		#{userPhon},#{userMail})
+	</insert>
+
+	<insert id="memberAuth">
+		insert into TBL_MEMBER_AUTH(userId , auth)values(#{userId},#{auth})
+	</insert>
+
+	<select id="useridCheck" resultType="int">
+		select count(*) from
+		tbl_member where userId=#{userId}
+	</select>
+
+	<select id="userMailcheck" resultType="String">
+		select userId from
+		tbl_member
+		where userName = #{userName}
+		and userPhon = #{userPhon}
+	</select>
+
+
+
+</mapper>

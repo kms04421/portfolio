@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.icia.mapper.ShopMapper">
+
+
+	<insert id="orderin">
+		insert into tbl_order (orderId, userId,
+		orderRec,userAddr1,userAddr2,
+		userAddr3, orderPhon, amount)
+		values
+		(#{orderId}, #{userId}, #{orderRec},#{userAddr1},
+		#{userAddr2},#{userAddr3},#{orderPhon},#{sumbue})
+	</insert>
+
+	<insert id="addCart">
+		insert into tbl_cart(cartNum,userId,gdsNum,cartStock)
+		values (tbl_cart_seq.nextval,#{userId},#{gdsNum},#{cartStock})
+	</insert>
+
+	<select id="cartList" resultType="kr.icia.domain.CartListVO">
+
+		select
+		c.cartNum, c.userId, c.gdsNum, c.cartStock, c.addDate,
+		g.gdsName, g.gdsPrice ,g.pdId
+		from tbl_cart c
+		inner join tbl_goods g
+		on c.gdsNum = g.gdsNum
+		where c.userId = #{userId}
+	</select>
+
+<select id="orderList" resultType="kr.icia.domain.OrderVO">
+		select
+  		orderId ,userId,
+		orderRec ,userAddr1 ,userAddr2,
+		userAddr3, orderPhon ,amount
+   		 from tbl_order
+    		where   
+    		userId=#{userId}
+	</select>
+	<delete id="deleteCart">
+		delete tbl_cart
+		where cartNum = #{cartNum}
+		and userId = #{userId}
+	</delete>
+	
+	<delete id="deleteOrder">
+		delete tbl_order
+		where orderId = #{orderId}
+		and userId = #{userId}
+	</delete>
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.icia.mapper.AttachMapper">
+
+
+
+	<insert id="uploadImg">
+		insert into MEMBER_IMAGE (uuId, uploadPath,fileName,
+		 pdId) values
+		(#{uuId},#{uploadPath},#{fileName},#{pdId})
+	</insert>
+	
+		<resultMap type="kr.icia.domain.AttachVO" id="AttachMap">
+		<id property="pdId" column="pdId" />		
+		<result property="pdId" column="pdId" />
+		<result property="uuId" column="uuId" />
+		<result property="fileName" column="fileName" />
+		<result property="uploadPath" column="uploadPath" />
+		
+	</resultMap>
+	
+
+<select id="getImgList" resultType="kr.icia.domain.AttachVO">
+select uuId, uploadPath,fileName, pdId 
+from MEMBER_IMAGE where pdId=#{pdId}
+</select>
+<update id="attachmodify">
+		update MEMBER_IMAGE
+		set
+		uuId = #{uuId},
+		uploadPath = #{uploadPath},
+		fileName = #{fileName}
+		where pdId = #{pdId}
+</update>
+	<delete id="attachDelete">
+	delete MEMBER_IMAGE where pdId=#{pdId}
+	</delete>
+</mapper>
